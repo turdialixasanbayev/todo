@@ -22,7 +22,7 @@ from django.conf.urls.static import static
 from django.views.static import serve
 
 urlpatterns = [
-    path('admin-dashboard/', admin.site.urls),
+    path('todo-admin-dashboard/', admin.site.urls),
 
     path('api/todo/v1/', include('todo.urls')),
 
