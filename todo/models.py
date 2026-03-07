@@ -35,3 +35,37 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.email}'s profile"
+
+
+class ToDo(models.Model):
+
+    class Priority(models.TextChoices):
+        LOW = "low", "Low"
+        MEDIUM = "medium", "Medium"
+        HIGH = "high", "High"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='todos'
+    )
+    priority = models.CharField(
+        max_length=15,
+        choices=Priority.choices,
+        default=Priority.MEDIUM
+    )
+    title = models.CharField(max_length=225)
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to="todos/%Y/%m/%d/", blank=True, null=True)
+    completed = models.BooleanField(default=False)
+    due_date = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Todo"
+        verbose_name_plural = "Todos"
+
+    def __str__(self):
+        return self.title

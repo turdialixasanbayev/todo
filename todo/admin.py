@@ -2,8 +2,7 @@ from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
 
-from .models import CustomUser, Profile
-
+from .models import CustomUser, Profile, ToDo
 
 admin.site.site_header = "ToDo Admin Dashboard"
 admin.site.site_title = "ToDo Admin Dashboard"
@@ -32,3 +31,30 @@ class CustomUserAdmin(UserAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('full_name',)
     search_fields = ('full_name',)
+
+
+@admin.register(ToDo)
+class ToDoAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'priority',
+        'title',
+        'image',
+        'completed',
+        'due_date',
+        'is_active',
+    )
+    search_fields = ('title',)
+    autocomplete_fields = ('user',)
+    list_filter = (
+        'priority',
+        'is_active',
+        'completed',
+        'due_date'
+    )
+    list_editable = (
+        "completed",
+        "priority",
+        'is_active',
+    )
+    list_display_links = ("user", "title")
