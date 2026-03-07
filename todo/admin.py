@@ -31,6 +31,7 @@ class CustomUserAdmin(UserAdmin):
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ('full_name',)
     search_fields = ('full_name',)
+    autocomplete_fields = ('user',)
 
 
 @admin.register(ToDo)
