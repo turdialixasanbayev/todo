@@ -6,6 +6,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 
+from .models import Profile
+
 
 User = get_user_model()
 
@@ -70,9 +72,30 @@ class MeAPISerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
-            'email'
+            'email',
+            'user_permissions',
+            'groups',
+            'is_active',
+            'is_staff',
+            'is_superuser',
+            'date_joined',
+            'last_login'
         ]
 
 
 class DeleteAccountAPISerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
+
+
+class MyProfileAPISerializer(serializers.ModelSerializer):
+    user = MeAPISerializer(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            "id",
+            "user",
+            "full_name",
+            "image",
+            "bio",
+        ]

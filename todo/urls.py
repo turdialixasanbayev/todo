@@ -7,7 +7,8 @@ from .views import (
     login_view,
     logout_view,
     me_view,
-    delete_account_view
+    delete_account_view,
+    my_profile_view
 )
 
 app_name = 'todo'
@@ -22,4 +23,5 @@ urlpatterns = [
     path("auth/logout/", logout_view, name="logout"),
     path("auth/me/", me_view, name="me"),
     path("auth/delete-account/", delete_account_view, name="delete-account"),
+    path("auth/my-profile/", my_profile_view, name="my-profile"),
 ]

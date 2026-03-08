@@ -10,7 +10,8 @@ from .serializers import (
     LoginAPISerializer,
     LogoutAPISerializer,
     MeAPISerializer,
-    DeleteAccountAPISerializer
+    DeleteAccountAPISerializer,
+    MyProfileAPISerializer
 )
 from .permissions import (
     IsAnonymous
@@ -150,3 +151,14 @@ class DeleteAccountAPIView(generics.GenericAPIView):
 
 
 delete_account_view = DeleteAccountAPIView.as_view()
+
+
+class MyProfileAPIView(generics.RetrieveAPIView):
+    serializer_class = MyProfileAPISerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+
+
+my_profile_view = MyProfileAPIView.as_view()
