@@ -99,3 +99,13 @@ class MyProfileAPISerializer(serializers.ModelSerializer):
             "image",
             "bio",
         ]
+
+
+class ProfileUpdateAPISerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = [
+            'full_name',
+            'image',
+            'bio'
+        ]

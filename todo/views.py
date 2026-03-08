@@ -11,7 +11,8 @@ from .serializers import (
     LogoutAPISerializer,
     MeAPISerializer,
     DeleteAccountAPISerializer,
-    MyProfileAPISerializer
+    MyProfileAPISerializer,
+    ProfileUpdateAPISerializer
 )
 from .permissions import (
     IsAnonymous
@@ -162,3 +163,14 @@ class MyProfileAPIView(generics.RetrieveAPIView):
 
 
 my_profile_view = MyProfileAPIView.as_view()
+
+
+class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileUpdateAPISerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+
+
+profile_update_view = ProfileUpdateAPIView.as_view()
