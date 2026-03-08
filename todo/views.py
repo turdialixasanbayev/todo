@@ -9,7 +9,6 @@ from .serializers import (
     RegisterAPISerializer,
     LoginAPISerializer,
     LogoutAPISerializer,
-    MeAPISerializer,
     DeleteAccountAPISerializer,
     MyProfileAPISerializer,
     ProfileUpdateAPISerializer
@@ -38,14 +37,10 @@ class RegisterAPIView(generics.GenericAPIView):
 
         return Response(
             {
-                "user": {
-                    "id": user.id,
-                    "email": user.email
-                },
+                "email": user.email,
                 "access": str(access),
                 "refresh": str(refresh),
-                "message": "User succesfully created.",
-                "status": status.HTTP_201_CREATED
+                "message": "User succesfully created"
             },
             status=status.HTTP_201_CREATED
         )
@@ -73,14 +68,10 @@ class LoginAPIView(generics.GenericAPIView):
 
         return Response(
             {
-                "user": {
-                    "id": user.id,
-                    "email": user.email
-                },
+                "email": user.email,
                 "access": str(access),
                 "refresh": str(refresh),
-                "message": "User successfully logged in.",
-                "status": status.HTTP_200_OK
+                "message": "User successfully logged in"
             },
             status=status.HTTP_200_OK
         )
@@ -103,34 +94,17 @@ class LogoutAPIView(generics.GenericAPIView):
             token.blacklist()
         except TokenError:
             return Response(
-                {
-                    "detail": "Invalid or expired token",
-                    "status": status.HTTP_400_BAD_REQUEST
-                },
+                {"detail": "Invalid or expired token"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
         return Response(
-            {
-                "message": "Logout successful",
-                "status": status.HTTP_205_RESET_CONTENT
-            },
+            {"message": "Logout successful"},
             status=status.HTTP_205_RESET_CONTENT
         )
 
 
 logout_view = LogoutAPIView.as_view()
-
-
-class MeAPIView(generics.RetrieveAPIView):
-    serializer_class = MeAPISerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self):
-        return self.request.user
-
-
-me_view = MeAPIView.as_view()
 
 
 class DeleteAccountAPIView(generics.GenericAPIView):
@@ -145,10 +119,16 @@ class DeleteAccountAPIView(generics.GenericAPIView):
         password = serializer.validated_data["password"]
 
         if not user.check_password(password):
-            return Response({"detail": "Password is incorrect", "status": status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Password is incorrect"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         user.delete()
-        return Response({"detail": "Account deleted successfully", "status": status.HTTP_204_NO_CONTENT}, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"message": "Account deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 delete_account_view = DeleteAccountAPIView.as_view()

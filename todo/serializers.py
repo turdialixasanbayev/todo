@@ -4,9 +4,12 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model
+
 from django.core.exceptions import ValidationError as DjangoValidationError
 
-from .models import Profile
+from .models import (
+    Profile
+)
 
 
 User = get_user_model()
@@ -28,7 +31,7 @@ class RegisterAPISerializer(serializers.Serializer):
     remember_me = serializers.BooleanField(write_only=True, required=True)
 
     def validate_email(self, value):
-        return value.lower()
+        return value.lower().strip()
 
     def validate(self, data):
         try:
@@ -67,34 +70,17 @@ class LogoutAPISerializer(serializers.Serializer):
     refresh = serializers.CharField(required=True, write_only=True)
 
 
-class MeAPISerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = [
-            'id',
-            'email',
-            'user_permissions',
-            'groups',
-            'is_active',
-            'is_staff',
-            'is_superuser',
-            'date_joined',
-            'last_login'
-        ]
-
-
 class DeleteAccountAPISerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
 
 
 class MyProfileAPISerializer(serializers.ModelSerializer):
-    user = MeAPISerializer(read_only=True)
+    email = serializers.EmailField(source="user.email", read_only=True)
 
     class Meta:
         model = Profile
         fields = [
-            "id",
-            "user",
+            "email",
             "full_name",
             "image",
             "bio",

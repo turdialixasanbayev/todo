@@ -1,0 +1,3 @@
+change password api
+change email api
+reset password api

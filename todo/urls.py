@@ -6,7 +6,6 @@ from .views import (
     register_view,
     login_view,
     logout_view,
-    me_view,
     delete_account_view,
     my_profile_view,
     profile_update_view
@@ -22,7 +21,6 @@ urlpatterns = [
     path("auth/register/", register_view, name="register"),
     path("auth/login/", login_view, name="login"),
     path("auth/logout/", logout_view, name="logout"),
-    path("auth/me/", me_view, name="me"),
     path("auth/delete-account/", delete_account_view, name="delete-account"),
     path("auth/my-profile/", my_profile_view, name="my-profile"),
     path("auth/profile-update/", profile_update_view, name="profile-update"),
