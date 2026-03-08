@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -10,10 +11,22 @@ User = get_user_model()
 
 
 class RegisterAPISerializer(serializers.Serializer):
-    email = serializers.EmailField(write_only=True, required=True)
+    email = serializers.EmailField(
+        write_only=True,
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="User with this email already exists"
+            )
+        ]
+    )
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     repeat_password = serializers.CharField(write_only=True, required=True, min_length=8)
     remember_me = serializers.BooleanField(write_only=True, required=True)
+
+    def validate_email(self, value):
+        return value.lower()
 
     def validate(self, data):
         try:
@@ -23,12 +36,7 @@ class RegisterAPISerializer(serializers.Serializer):
 
         if data["password"] != data["repeat_password"]:
             raise serializers.ValidationError({
-                "password": "Passwords do not match"
-            })
-
-        if User.objects.filter(email=data["email"]).exists():
-            raise serializers.ValidationError({
-                "email": "User with this email already exists"
+                "repeat_password": "Passwords do not match"
             })
 
         return data
