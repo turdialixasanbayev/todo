@@ -1,3 +1,16 @@
 change password api
 change email api
 reset password api
+library integration
+    django-cleanup
+    psycopg
+    drf-yasg/drf-spectacular (api docs)
+    django-ckeditor
+    django-query-counter
+    django-environ (environment variables)
+database query optimization
+clean code optimization
+monitoring
+logging (python logger)
+logni txt ga yozish
+unit test

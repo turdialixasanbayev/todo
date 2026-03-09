@@ -1,25 +1,31 @@
+from django.shortcuts import get_object_or_404
+
 from datetime import timedelta
 
-from rest_framework import generics, status, permissions
+from rest_framework import generics, status, permissions, viewsets
 from rest_framework.response import Response
 
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from .serializers import (
-    RegisterAPISerializer,
-    LoginAPISerializer,
-    LogoutAPISerializer,
-    DeleteAccountAPISerializer,
-    MyProfileAPISerializer,
-    ProfileUpdateAPISerializer
+    RegisterSerializer,
+    LoginSerializer,
+    LogoutSerializer,
+    DeleteAccountSerializer,
+    MyProfileModelSerializer,
+    ProfileUpdateModelSerializer,
+    ToDoModelSerializer
 )
 from .permissions import (
-    IsAnonymous
+    IsAnonymous,
+    IsOwner,
 )
+from .models import ToDo
+from .hashids import decode_id
 
 
-class RegisterAPIView(generics.GenericAPIView):
-    serializer_class = RegisterAPISerializer
+class RegisterGenericAPIView(generics.GenericAPIView):
+    serializer_class = RegisterSerializer
     permission_classes = [IsAnonymous]
 
     def post(self, request, *args, **kwargs):
@@ -46,11 +52,11 @@ class RegisterAPIView(generics.GenericAPIView):
         )
 
 
-register_view = RegisterAPIView.as_view()
+register_view = RegisterGenericAPIView.as_view()
 
 
-class LoginAPIView(generics.GenericAPIView):
-    serializer_class = LoginAPISerializer
+class LoginGenericAPIView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
     permission_classes = [IsAnonymous]
 
     def post(self, request, *args, **kwargs):
@@ -77,11 +83,11 @@ class LoginAPIView(generics.GenericAPIView):
         )
 
 
-login_view = LoginAPIView.as_view()
+login_view = LoginGenericAPIView.as_view()
 
 
-class LogoutAPIView(generics.GenericAPIView):
-    serializer_class = LogoutAPISerializer
+class LogoutGenericAPIView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -104,11 +110,11 @@ class LogoutAPIView(generics.GenericAPIView):
         )
 
 
-logout_view = LogoutAPIView.as_view()
+logout_view = LogoutGenericAPIView.as_view()
 
 
-class DeleteAccountAPIView(generics.GenericAPIView):
-    serializer_class = DeleteAccountAPISerializer
+class DeleteAccountGenericAPIView(generics.GenericAPIView):
+    serializer_class = DeleteAccountSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, *args, **kwargs):
@@ -131,26 +137,66 @@ class DeleteAccountAPIView(generics.GenericAPIView):
         )
 
 
-delete_account_view = DeleteAccountAPIView.as_view()
+delete_account_view = DeleteAccountGenericAPIView.as_view()
 
 
-class MyProfileAPIView(generics.RetrieveAPIView):
-    serializer_class = MyProfileAPISerializer
+class MyProfileRetrieveAPIView(generics.RetrieveAPIView):
+    serializer_class = MyProfileModelSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user.profile
 
 
-my_profile_view = MyProfileAPIView.as_view()
+my_profile_view = MyProfileRetrieveAPIView.as_view()
 
 
-class ProfileUpdateAPIView(generics.RetrieveUpdateAPIView):
-    serializer_class = ProfileUpdateAPISerializer
+class ProfileUpdateRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
+    serializer_class = ProfileUpdateModelSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user.profile
 
 
-profile_update_view = ProfileUpdateAPIView.as_view()
+profile_update_view = ProfileUpdateRetrieveUpdateAPIView.as_view()
+
+
+class ToDoModelViewSet(viewsets.ModelViewSet):
+    serializer_class = ToDoModelSerializer
+    permission_classes = [IsOwner]
+
+    filterset_fields = ['priority']
+    search_fields = ['title']
+    ordering_fields = ['due_date', 'created_at', 'updated_at', 'priority']
+    ordering = ['-due_date']
+
+    def get_queryset(self):
+        return ToDo.objects.select_related('user').filter(
+            user=self.request.user,
+            is_active=True,
+            completed=False
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
+
+    def get_object(self):
+        hashid = self.kwargs["pk"]
+        pk = decode_id(hashid)
+
+        return get_object_or_404(
+            ToDo.objects.select_related('user').filter(
+                user=self.request.user,
+                is_active=True,
+                completed=False
+            ),
+            pk=pk
+        )

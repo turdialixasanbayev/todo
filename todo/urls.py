@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import path, include
+
+from rest_framework.routers import DefaultRouter
 
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
@@ -8,10 +10,17 @@ from .views import (
     logout_view,
     delete_account_view,
     my_profile_view,
-    profile_update_view
+    profile_update_view,
+    ToDoModelViewSet
 )
 
+
 app_name = 'todo'
+
+
+router = DefaultRouter()
+
+router.register(r'todos', ToDoModelViewSet, basename='todo')
 
 
 urlpatterns = [
@@ -24,4 +33,6 @@ urlpatterns = [
     path("auth/delete-account/", delete_account_view, name="delete-account"),
     path("auth/my-profile/", my_profile_view, name="my-profile"),
     path("auth/profile-update/", profile_update_view, name="profile-update"),
+
+    path('viewsets/', include(router.urls)),
 ]

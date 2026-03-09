@@ -8,14 +8,17 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from .models import (
-    Profile
+    Profile,
+    ToDo
 )
+
+from .hashids import encode_id
 
 
 User = get_user_model()
 
 
-class RegisterAPISerializer(serializers.Serializer):
+class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(
         write_only=True,
         required=True,
@@ -53,7 +56,7 @@ class RegisterAPISerializer(serializers.Serializer):
         return user
 
 
-class LoginAPISerializer(serializers.Serializer):
+class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True, required=True)
     password = serializers.CharField(write_only=True, required=True, min_length=8)
     remember_me = serializers.BooleanField(write_only=True, required=True)
@@ -66,15 +69,15 @@ class LoginAPISerializer(serializers.Serializer):
         return data
 
 
-class LogoutAPISerializer(serializers.Serializer):
+class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField(required=True, write_only=True)
 
 
-class DeleteAccountAPISerializer(serializers.Serializer):
+class DeleteAccountSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, required=True, min_length=8)
 
 
-class MyProfileAPISerializer(serializers.ModelSerializer):
+class MyProfileModelSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
 
     class Meta:
@@ -87,7 +90,7 @@ class MyProfileAPISerializer(serializers.ModelSerializer):
         ]
 
 
-class ProfileUpdateAPISerializer(serializers.ModelSerializer):
+class ProfileUpdateModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
@@ -95,3 +98,27 @@ class ProfileUpdateAPISerializer(serializers.ModelSerializer):
             'image',
             'bio'
         ]
+
+
+class ToDoModelSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField(read_only=True)
+    user = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = ToDo
+        fields = [
+            'id',
+            'user',
+            'priority',
+            'title',
+            'description',
+            'image',
+            'completed',
+            'due_date',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+
+    def get_id(self, obj):
+        return encode_id(obj.id)
