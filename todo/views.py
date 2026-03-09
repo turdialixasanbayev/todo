@@ -22,6 +22,8 @@ from .permissions import (
 )
 from .models import ToDo
 from .hashids import decode_id
+from .paginations import ToDoPagination
+from .filters import ToDoFilter
 
 
 class RegisterGenericAPIView(generics.GenericAPIView):
@@ -165,8 +167,9 @@ profile_update_view = ProfileUpdateRetrieveUpdateAPIView.as_view()
 class ToDoModelViewSet(viewsets.ModelViewSet):
     serializer_class = ToDoModelSerializer
     permission_classes = [IsOwner]
+    pagination_class = ToDoPagination
+    filterset_class = ToDoFilter
 
-    filterset_fields = ['priority']
     search_fields = ['title']
     ordering_fields = ['due_date', 'created_at', 'updated_at', 'priority']
     ordering = ['-due_date']
